@@ -6,30 +6,37 @@
 <title>Presenças Treino</title>
 <style>
  body { font-family: Arial; margin: 20px; }
- h1 { text-align: center; }
+ h1 { text-align: center; font-size: 28px; }
  .athlete {
      display: flex;
      justify-content: space-between;
-     padding: 10px;
+     padding: 14px;
      border-bottom: 1px solid #ccc;
  }
+ .athlete span {
+     font-size: 24px; /* 🔥 Nomes maiores para telemóvel */
+ }
  .present-toggle {
-     font-size: 20px;
-     padding: 5px 15px;
+     font-size: 28px; /* Botão maior ↑ */
+     padding: 10px 20px;
      cursor: pointer;
  }
  button {
-     margin-top: 20px;
-     padding: 12px 20px;
-     font-size: 18px;
+     margin-top: 25px;
+     padding: 16px 20px;
+     font-size: 22px; /* Botão Exportar maior */
      width: 100%;
+ }
+ input[type=date] {
+     font-size: 20px;
+     padding: 8px;
  }
 </style>
 </head>
 <body>
 <h1>Presenças do Treino</h1>
-<label>Data do treino:</label>
-<input type='date' id='dataTreino' style='font-size:16px; padding:5px;' />
+<label style='font-size:20px;'>Data do treino:</label>
+<input type='date' id='dataTreino' />
 <div id='lista'></div>
 <button onclick='downloadExcel()'>Gerar Excel</button>
 <script>
