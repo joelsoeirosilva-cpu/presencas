@@ -10,58 +10,46 @@
  h1 { text-align: center; font-size: 28px; margin: 8px 0 16px; }
  .row { display: flex; align-items: center; justify-content: space-between; padding: 14px 8px; border-bottom: 1px solid #e0e0e0; }
  .name { font-size: 24px; padding-right: 12px; flex: 1 1 auto; min-width: 0; }
- /* 🔒 Mantemos uma coluna fixa para o botão, mais larga e sempre no MESMO sítio */
  .btn-wrap { flex: 0 0 130px; display: flex; justify-content: flex-end; }
- .toggle { font-size: 32px; padding: 12px 0; width: 120px; /* largura do botão maior */ text-align: center; cursor: pointer; background: #eee; border: 1px solid #aaa; border-radius: 10px; user-select: none; }
+ .toggle { font-size: 32px; padding: 12px 0; width: 120px; text-align: center; cursor: pointer; background: #eee; border: 1px solid #aaa; border-radius: 10px; user-select: none; }
  .toggle.on { background: #e7f7eb; border-color: #2e7d32; color: #2e7d32; }
  .toggle.off { background: #f6e9e9; border-color: #b71c1c; color: #b71c1c; }
  button.primary { margin-top: 22px; padding: 16px 20px; font-size: 22px; width: 100%; }
  label, input[type=date] { font-size: 20px; }
  input[type=date] { padding: 8px; }
- /* Opcional: limitar a largura máxima para ficar centrado visualmente em ecrãs grandes */
  .container { max-width: 680px; margin: 0 auto; }
+ .hint { color: #666; font-size: 14px; margin: 6px 0 14px; }
 </style>
 </head>
 <body>
 <div class="container">
   <h1>Presenças do Treino</h1>
-  <div style='display:flex; gap:12px; align-items:center; margin-bottom:10px;'>
+  <div style='display:flex; gap:12px; align-items:center; margin-bottom:6px;'>
     <label for='dataTreino' style='font-size:20px;'>Data do treino:</label>
     <input type='date' id='dataTreino' />
   </div>
+  <div class="hint">A lista de atletas é lida do ficheiro <strong>atletas.txt</strong> (um nome por linha).</div>
   <div id='lista'></div>
   <button class='primary' onclick='downloadExcel()'>Gerar Excel</button>
 </div>
 <script>
-const atletas = [
- { Id: 1, Nome: "Manel Silva" },
- { Id: 2, Nome: "Guilherme Mestrinho" },
- { Id: 3, Nome: "Vasco Mendes" },
- { Id: 4, Nome: "Tiago Simoes" },
- { Id: 5, Nome: "Dinis" },
- { Id: 6, Nome: "Tome" },
- { Id: 7, Nome: "Vicente Caldeira" },
- { Id: 8, Nome: "Filpe Galhardas" },
- { Id: 9, Nome: "Gabriel Peguicha" },
- { Id: 10, Nome: "Francisco Lavado" },
- { Id: 11, Nome: "Afonso Casquinha" },
- { Id: 12, Nome: "Salvador Mira" },
- { Id: 13, Nome: "Filipe Roque" },
- { Id: 14, Nome: "Vicente Espadinha" },
- { Id: 15, Nome: "Vasco Soares" },
- { Id: 16, Nome: "Duarte Barreto" },
- { Id: 17, Nome: "Tomas Bengalinha" },
- { Id: 18, Nome: "Simão Ribeiro" },
- { Id: 19, Nome: "Gonçalo" },
- { Id: 20, Nome: "Artur" },
- { Id: 21, Nome: "Bernardo" },
- { Id: 22, Nome: "Tomas Serrão" },
- { Id: 23, Nome: "Duarte Ferreira" },
- { Id: 24, Nome: "Simão Carapinha" },
- { Id: 25, Nome: "Afonso Ponte" }
-];
-
+let atletas = []; // carregados do atletas.txt
 const estado = {}; // id -> boolean
+
+async function carregarAtletas() {
+  try {
+    const resp = await fetch('atletas.txt?_=' + Date.now()); // cache-busting simples
+    if (!resp.ok) throw new Error('Falha a carregar atletas.txt');
+    const txt = await resp.text();
+    const linhas = txt.split(/?
+/).map(l => l.trim()).filter(l => l.length > 0);
+    atletas = linhas.map((nome, idx) => ({ Id: idx + 1, Nome: nome }));
+    renderLista();
+  } catch (e) {
+    document.getElementById('lista').innerHTML = '<div style="color:#b00020;">Não foi possível carregar <b>atletas.txt</b>. Confirma que o ficheiro está na mesma pasta desta página.</div>';
+    console.error(e);
+  }
+}
 
 function renderLista() {
   const div = document.getElementById('lista');
@@ -70,6 +58,7 @@ function renderLista() {
     if (estado[a.Id] === undefined) estado[a.Id] = false;
     const row = document.createElement('div');
     row.className = 'row';
+
     const name = document.createElement('div');
     name.className = 'name';
     name.textContent = a.Nome;
@@ -116,9 +105,8 @@ function downloadExcel() {
 
 const script = document.createElement('script');
 script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js';
+script.onload = carregarAtletas;
 document.head.appendChild(script);
-
-renderLista();
 </script>
 </body>
 </html>
