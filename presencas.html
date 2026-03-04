@@ -28,25 +28,24 @@
     <label for='dataTreino' style='font-size:20px;'>Data do treino:</label>
     <input type='date' id='dataTreino' />
   </div>
-  <div class="hint">A lista de atletas é lida do ficheiro <strong>atletas.txt</strong> (um nome por linha).</div>
+  <div class="hint">A lista de atletas é lida do ficheiro <strong>atletas.json</strong> (array de nomes).</div>
   <div id='lista'></div>
   <button class='primary' onclick='downloadExcel()'>Gerar Excel</button>
 </div>
 <script>
-let atletas = []; // carregados do atletas.txt
+let atletas = []; // carregados do atletas.json
 const estado = {}; // id -> boolean
 
 async function carregarAtletas() {
   try {
-    const resp = await fetch('atletas.txt?_=' + Date.now()); // cache-busting simples
-    if (!resp.ok) throw new Error('Falha a carregar atletas.txt');
-    const txt = await resp.text();
-    const linhas = txt.split(/?
-/).map(l => l.trim()).filter(l => l.length > 0);
-    atletas = linhas.map((nome, idx) => ({ Id: idx + 1, Nome: nome }));
+    const resp = await fetch('atletas.json?_=' + Date.now(), {cache:'no-store'});
+    if (!resp.ok) throw new Error('Falha a carregar atletas.json');
+    const arr = await resp.json();
+    if (!Array.isArray(arr)) throw new Error('Formato inválido no atletas.json (esperado array de strings)');
+    atletas = arr.map((nome, idx) => ({ Id: idx + 1, Nome: String(nome) }));
     renderLista();
   } catch (e) {
-    document.getElementById('lista').innerHTML = '<div style="color:#b00020;">Não foi possível carregar <b>atletas.txt</b>. Confirma que o ficheiro está na mesma pasta desta página.</div>';
+    document.getElementById('lista').innerHTML = '<div style="color:#b00020;">Não foi possível carregar <b>atletas.json</b>. Confirma que o ficheiro está na mesma pasta desta página e no formato correto.</div>';
     console.error(e);
   }
 }
