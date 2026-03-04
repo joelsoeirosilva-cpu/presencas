@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='UTF-8'>
+<title>Presenças Treino</title>
+<style>
+ body { font-family: Arial; margin: 20px; }
+ h1 { text-align: center; }
+ .athlete {
+     display: flex;
+     justify-content: space-between;
+     padding: 10px;
+     border-bottom: 1px solid #ccc;
+ }
+ .present-toggle {
+     font-size: 20px;
+     padding: 5px 15px;
+     cursor: pointer;
+ }
+ button {
+     margin-top: 20px;
+     padding: 12px 20px;
+     font-size: 18px;
+     width: 100%;
+ }
+</style>
+</head>
+<body>
+<h1>Presenças do Treino</h1>
+<label>Data do treino:</label>
+<input type='date' id='dataTreino' style='font-size:16px; padding:5px;' />
+<div id='lista'></div>
+<button onclick='downloadExcel()'>Gerar Excel</button>
+<script>
+const atletas = [
+ { Id: 1, Nome: "Manel Silva" },
+ { Id: 2, Nome: "Guilherme Mestrinho" },
+ { Id: 3, Nome: "Vasco Mendes" },
+ { Id: 4, Nome: "Tiago Simoes" },
+ { Id: 5, Nome: "Dinis" },
+ { Id: 6, Nome: "Tome" },
+ { Id: 7, Nome: "Vicente Caldeira" },
+ { Id: 8, Nome: "Filpe Galhardas" },
+ { Id: 9, Nome: "Gabriel Peguicha" },
+ { Id: 10, Nome: "Francisco Lavado" },
+ { Id: 11, Nome: "Afonso Casquinha" },
+ { Id: 12, Nome: "Salvador Mira" },
+ { Id: 13, Nome: "Filipe Roque" },
+ { Id: 14, Nome: "Vicente Espadinha" },
+ { Id: 15, Nome: "Vasco Soares" },
+ { Id: 16, Nome: "Duarte Barreto" },
+ { Id: 17, Nome: "Tomas Bengalinha" },
+ { Id: 18, Nome: "Simão Ribeiro" },
+ { Id: 19, Nome: "Gonçalo" },
+ { Id: 20, Nome: "Artur" },
+ { Id: 21, Nome: "Bernardo" },
+ { Id: 22, Nome: "Tomas Serrão" },
+ { Id: 23, Nome: "Duarte Ferreira" },
+ { Id: 24, Nome: "Simão Carapinha" },
+ { Id: 25, Nome: "Afonso Ponte" }
+];
+
+const estado = {};
+
+function renderLista() {
+ const div = document.getElementById('lista');
+ div.innerHTML = '';
+ atletas.forEach(a => {
+     estado[a.Id] = false;
+     const linha = document.createElement('div');
+     linha.className = 'athlete';
+     linha.innerHTML = `
+         <span>${a.Nome}</span>
+         <button class='present-toggle' id='btn_${a.Id}' onclick='toggle(${a.Id})'>❌</button>
+     `;
+     div.appendChild(linha);
+ });
+}
+
+function toggle(id) {
+ estado[id] = !estado[id];
+ const btn = document.getElementById('btn_' + id);
+ btn.innerHTML = estado[id] ? '✔️' : '❌';
+}
+
+function downloadExcel() {
+ if (!document.getElementById('dataTreino').value) {
+     alert('Escolhe a data do treino!');
+     return;
+ }
+ const dataTreino = document.getElementById('dataTreino').value;
+ const linhas = [ ["ID", "Nome", "Presente", "DataTreino"] ];
+ atletas.forEach(a => {
+     linhas.push([
+         a.Id,
+         a.Nome,
+         estado[a.Id] ? "Presente" : "Falta",
+         dataTreino
+     ]);
+ });
+ const wb = XLSX.utils.book_new();
+ const ws = XLSX.utils.aoa_to_sheet(linhas);
+ XLSX.utils.book_append_sheet(wb, ws, 'Presenças');
+ XLSX.writeFile(wb, 'Presencas_' + dataTreino + '.xlsx');
+}
+
+const script = document.createElement('script');
+script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js';
+document.head.appendChild(script);
+
+renderLista();
+</script>
+</body>
+</html>
